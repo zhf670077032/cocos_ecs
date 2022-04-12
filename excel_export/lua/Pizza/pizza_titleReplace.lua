@@ -19,7 +19,7 @@
 --#endregion
 
 
----@type PizzaTitleReplace[]
+---@type table<number, PizzaTitleReplace>
 local pizza_titleReplace = {
 [1] = {index=1,key="pizza_text_25",type=1,replace="pizza_text_25"},
 [2] = {index=2,key="pizza_activityname_01",type=1,replace="pizza_activityname_01"},

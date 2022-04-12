@@ -52,7 +52,7 @@ end
 
 local file_content_template = [[
 
----@type CLASS_NAME[]
+---@type table<number, CLASS_NAME>
 local LUA_NAME = {
 CONTENT_LIST
 };return LUA_NAME

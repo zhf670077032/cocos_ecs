@@ -19,7 +19,7 @@
 --#endregion
 
 
----@type PizzaFormula[]
+---@type table<number, PizzaFormula>
 local pizza_formula = {
 [1] = {index=1,activityType=1,sumValue=102,armorWeight={1,272,2,198,3,180,4,140,5,120,6,60,7,30}},
 [2] = {index=2,activityType=1,sumValue=103,armorWeight={1,271,2,198,3,178,4,141,5,120,6,60,7,32}},

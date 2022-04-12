@@ -19,7 +19,7 @@
 --#endregion
 
 
----@type PizzaConfig[]
+---@type table<number, PizzaConfig>
 local pizza_config = {
 [1] = {index=1,reward={500602,5},integral=72,record=0},
 [2] = {index=2,reward={811891,5},integral=95,record=0},

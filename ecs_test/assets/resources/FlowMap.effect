@@ -1,0 +1,113 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        texture2: { value: white }
+        FlowMap: { value: white }
+        alphaThreshold: { value: 0.5 }
+        Flow_Intensity: { value: 1.12 }
+        Flow_Speed: { value: -0.51 }
+        time : {value : 0}
+}%
+
+
+CCProgram vs %{
+  precision highp float;
+
+  #include <cc-global>
+  #include <cc-local>
+
+  in vec3 a_position;
+  in vec4 a_color;
+  out vec4 v_color;
+
+  in vec2 a_uv0;
+  out vec2 v_uv0;
+
+  void main () {
+    vec4 pos = vec4(a_position, 1);
+
+    #if CC_USE_MODEL
+    pos = cc_matViewProj * cc_matWorld * pos;
+    #else
+    pos = cc_matViewProj * pos;
+    #endif
+
+    v_uv0 = a_uv0;
+    v_color = a_color;
+    gl_Position = pos;
+  }
+}%
+
+
+CCProgram fs %{
+  precision highp float;
+
+  #include <alpha-test>
+  #include <texture>
+
+  in vec4 v_color;
+  in vec2 v_uv0;
+
+  uniform sampler2D texture;
+  uniform sampler2D texture2;
+  uniform sampler2D FlowMap;
+
+  uniform Constant {
+    float Flow_Intensity;
+    float Flow_Speed;
+    float time;
+  };
+
+  float lerp(float a, float b, float t)
+  {
+      t = min(1.0, t);
+      return a*(1.0-t)+b*t;
+  }
+
+  vec4 lerpV4(vec4 a, vec4 b, float t)
+  {
+      vec4 ret = vec4(0.0);
+      ret.r = lerp(a.r, b.r, t);
+      ret.g = lerp(a.g, b.g, t);
+      ret.b = lerp(a.b, b.b, t);
+      ret.a = lerp(a.a, b.a, t);
+      return ret;
+  }
+
+
+  void main () {
+    vec2 uv_FlowMap = v_uv0;
+
+    vec4 tex2DNode1 = texture2D( FlowMap, uv_FlowMap );
+    vec2 appendResult3 = vec2(tex2DNode1.r , 1.0 - tex2DNode1.g);
+    vec2 temp_cast_0 = vec2(0.5,0.5);
+    vec2 temp_output_7_0 = ( appendResult3 - temp_cast_0 ) * Flow_Intensity;
+    // float t = cc.time.x;
+    float temp_output_11_0 = ( time * Flow_Speed );
+    float temp_output_12_0 = fract( temp_output_11_0 );
+    // vec2 temp_cast_1 = (0.5).xx;
+    float temp_output_27_0 = abs( ( temp_output_12_0 - 0.5 ) );
+    float clampResult29 = clamp( ( temp_output_27_0 + temp_output_27_0 ) , 0.0 , 1.0 );
+
+    vec4 color_1 = texture2D(texture, v_uv0 + (temp_output_7_0 * temp_output_12_0));
+    vec4 color_2 = texture2D(texture2, (temp_output_7_0 * fract(temp_output_11_0 + 0.5)) + v_uv0);
+
+    vec4 lerpResult24 = lerpV4( color_1, color_2, clampResult29);
+    // gl_FragColor = vec4(lerpResult24.rgb, 1.0);
+    float lerpResult32 = lerp( color_1.a , color_2.a , clampResult29);
+    // gl_FragColor = lerpResult24;
+    gl_FragColor = vec4(lerpResult24.rgb, lerpResult32);
+    // gl_FragColor = tex2DNode1;
+  }
+}%

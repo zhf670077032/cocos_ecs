@@ -24,7 +24,7 @@
 --#endregion
 
 
----@type PizzaType[]
+---@type table<number, PizzaType>
 local pizza_type = {
 [1] = {index=1,activityType=1,activityName="pizza_activityname_01",activityIcon="Activity_pizzadazuozhan.png",activityShowIcon="pizzadazuozhang_caipu.png",ruleDes="pizza_text_29",itemShow=816446,itemDes="pizza_text_30",task={4114754,4114755,4114756,4114757,4114758,4114759,4114760,4114761,4114762,4114763,4114764,4114765,4114766,4114767,4114768}}
 };return pizza_type

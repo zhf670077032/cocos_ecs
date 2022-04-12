@@ -20,7 +20,7 @@
 --#endregion
 
 
----@type PizzaMaterial[]
+---@type table<number, PizzaMaterial>
 local pizza_material = {
 [1] = {index=1,activityType=1,item=816443,value=10,range={1,10}},
 [2] = {index=2,activityType=1,item=816444,value=50,range={1,10}},

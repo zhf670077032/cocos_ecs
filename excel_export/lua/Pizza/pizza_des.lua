@@ -18,7 +18,7 @@
 --#endregion
 
 
----@type PizzaDes[]
+---@type table<number, PizzaDes>
 local pizza_des = {
 [1] = {index=1,name="pizza_name_01",image="pizzadazuozhang_tudoupizza.png"},
 [2] = {index=2,name="pizza_name_02",image="pizzadazuozhang_jidanpizza.png"},

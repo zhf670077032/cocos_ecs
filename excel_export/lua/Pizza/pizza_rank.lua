@@ -21,7 +21,7 @@
 --#endregion
 
 
----@type PizzaRank[]
+---@type table<number, PizzaRank>
 local pizza_rank = {
 [1] = {index=1,activityID=9001271,activityType=1,rank={1,1},reward={416937,1,706570,10,811621,40,100903,40},rankType=0},
 [2] = {index=2,activityID=9001271,activityType=1,rank={2,2},reward={416937,1,706570,6,811621,30,100903,30},rankType=0},
