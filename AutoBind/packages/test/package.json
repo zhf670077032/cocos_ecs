@@ -1,0 +1,8 @@
+{
+  "name": "auto-bind",
+  "version": "0.0.1",
+  "description": "The package template for getting started.",
+  "author": "zhf",
+  "main": "main.js",
+  "scene-script": "./core/mainScript.js"
+}
