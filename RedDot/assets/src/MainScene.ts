@@ -1,42 +1,9 @@
-import { getInstance } from "./base/SingleFactory";
 import OnePage from "./OnePage";
 import RedDotMgr from "./RedDot/RedDotMgr";
-import { RedDotCalculateFunc } from "./RedDot/RedDotStaticConfig";
+import EventMgr from "./base/EventMgr";
+import { GameMessageDefine } from "./define/GameMessageDefine";
 
 const {ccclass, property} = cc._decorator;
-
-
-let testConfig = {
-    child1_2    : 1 //
-   ,child1_4    : 2 //
-
-   ,child1_1_1  : 3 //
-   ,child1_1_2  : 4 //
-   ,child1_1_3  : 5 //
-
-   ,child1_3_1  : 1 //
-   ,child1_3_2  : 2 //
-
-   ,child2_1    : 3 //
-   ,child2_3    : 1 //
-
-   ,child2_2_1  : 1 //
-   ,child2_2_2  : 2 //
-}
-
-let testfunc : RedDotCalculateFunc = function(name : string){
-    let num : number = testConfig[name] ? testConfig[name] : 0
-    return [num > 0, num]
-}
-
-for (let dotName in testConfig) {
-    let redDot = getInstance(RedDotMgr).getNodeByName(dotName)
-    if (redDot) {
-        redDot.setCalculateFunc(testfunc)
-        redDot.setCalculateParam(dotName)
-    }
-}
-
 
 @ccclass
 export default class MainScene extends cc.Component {
@@ -62,28 +29,21 @@ export default class MainScene extends cc.Component {
     nowSelect : string = null
 
     protected onLoad(): void {
-        getInstance(RedDotMgr).prefab = this.redDotPrefab
-        this.showRedDotPage(getInstance(RedDotMgr).nodeRoot.name)
-        cc.director.on("test", this.clickShow, this)
-        this.btnNode.on(cc.Node.EventType.TOUCH_END, this.test, this)
-        // window["main"] = this
-    }
-
-    test(){
-        if (testConfig[this.nowSelect]) {
-            testConfig[this.nowSelect] ++
-            getInstance(RedDotMgr).reCalculate(this.nowSelect)
-        }
+        RedDotMgr.prefab = this.redDotPrefab
+        this.showRedDotPage(RedDotMgr.nodeRoot.name)
+        EventMgr.on(GameMessageDefine.EVENT_CLICK_ONE_NODE, this.clickShow, this)
+        // this.btnNode.on(cc.Node.EventType.TOUCH_END, this.test, this)
+        window["main"] = this
     }
 
     showRedDotPage(dotName : string){
-        let redDot = getInstance(RedDotMgr).getNodeByName(dotName)
+        let redDot = RedDotMgr.getNodeByName(dotName)
         this.tipLabel.string = ""
         if (!redDot){
             this.tipLabel.string = "没找到节点"
             return
         }
-        let oldSelectDot = getInstance(RedDotMgr).getNodeByName(this.nowSelect)
+        let oldSelectDot = RedDotMgr.getNodeByName(this.nowSelect)
         this.nowSelect = dotName
         this.nowSelectLabel.string = "当前选中：" + dotName
         if(redDot.children.size <= 0){
@@ -104,7 +64,7 @@ export default class MainScene extends cc.Component {
         this.layout.node.addChild(newPage)
     }
 
-    clickShow(dotName : string){
+    clickShow(msgName : string, dotName : string){
         this.showRedDotPage(dotName)
     }
 }

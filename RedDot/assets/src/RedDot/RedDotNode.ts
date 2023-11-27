@@ -1,3 +1,5 @@
+import { getInstance } from "../base/SingleFactory"
+import RedDotMgr from "./RedDotMgr"
 import { RedDotCalculateFunc } from "./RedDotStaticConfig"
 
 /** 红点树的一个结点 */
@@ -10,7 +12,8 @@ export default class RedDotNode {
     redPointCount   : number = null
     calculateFunc   : RedDotCalculateFunc = null
     calculateParam  : any = null
-
+    preCondition    : string[] = null
+    msgName    : string | string[] = null
     
     constructor(name : string) {
         this.name = name
@@ -89,24 +92,55 @@ export default class RedDotNode {
         }
     }
 
+    setPreCondition(preCondition : string | string[]){
+        if (typeof preCondition == "string"){
+            this.preCondition = [preCondition]
+        } else if(typeof preCondition == "object") {
+            this.preCondition = preCondition
+        }
+    }
+
+    setMessageName(msgName : string | string[]){
+        this.msgName = msgName
+    }
+
+    /** 先计算前置条件结点是否满足， 如果不满足，则不进行显示 */
+    calPreConditions() : boolean{
+        if (this.preCondition){
+            for (let i = 0; i < this.preCondition.length; i++) {
+                let redDot = RedDotMgr.getNodeByName(this.preCondition[i])
+                let show = redDot.getResult()[0]
+                if (!show){
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
     /** 获取计算结果 */
     getResult() : [boolean, number]{
         if(this.showRedPoint == null || this.redPointCount == null){
-            if(typeof this.calculateFunc == "function"){
-                [this.showRedPoint, this.redPointCount] = this.calculateFunc(this.calculateParam)
+            let isVisible = this.calPreConditions()
+            if (isVisible){
+                if(typeof this.calculateFunc == "function"){
+                    [this.showRedPoint, this.redPointCount] = this.calculateFunc(this.calculateParam)
+                } else {
+                    let num = 0
+                    this.children.forEach(child => {
+                        let [temp_show, temp_num] = child.getResult()
+                        if(temp_show){
+                            num += temp_num
+                        }
+                    })
+                    this.showRedPoint = num > 0
+                    this.redPointCount = num 
+                }
             } else {
-                let num = 0
-                this.children.forEach(child => {
-                    let [temp_show, temp_num] = child.getResult()
-                    if(temp_show){
-                        num += temp_num
-                    }
-                })
-                this.showRedPoint = num > 0
-                this.redPointCount = num 
+                this.showRedPoint = false
+                this.redPointCount = 0
             }
         }
-
         return [this.showRedPoint, this.redPointCount]
     }
 }

@@ -1,4 +1,6 @@
+import EventMgr from "./base/EventMgr";
 import { getInstance } from "./base/SingleFactory";
+import { GameMessageDefine } from "./define/GameMessageDefine";
 import RedDotMgr from "./RedDot/RedDotMgr";
 
 const {ccclass, property} = cc._decorator;
@@ -16,7 +18,7 @@ export default class OneNode extends cc.Component {
     setDotName(dotName : string){
         this.dotName = dotName
         this.dotNameLabel.string = dotName
-        getInstance(RedDotMgr).createRedDot(this.node, this.dotName, 50, 30)
+        RedDotMgr.createRedDot(this.node, this.dotName, 50, 30)
     }
 
     protected onLoad(): void {
@@ -24,6 +26,6 @@ export default class OneNode extends cc.Component {
     }
 
     onClick(){
-        cc.director.emit("test", this.dotName)
+        EventMgr.emit(GameMessageDefine.EVENT_CLICK_ONE_NODE, this.dotName)
     }
 }

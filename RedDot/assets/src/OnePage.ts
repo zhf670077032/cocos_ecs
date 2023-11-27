@@ -25,13 +25,13 @@ export default class OnePage extends cc.Component {
     dotName : string = null
     setDotName(dotName : string){
         this.dotName = dotName
-        let depth = getInstance(RedDotMgr).getNodeByName(dotName).getDepth()
+        let depth = RedDotMgr.getNodeByName(dotName).getDepth()
         this.scrollview.node.color = new cc.Color().fromHEX(colorConfig[depth])
         this.initScrollView()
     }
 
     initScrollView(){
-        let redDot = getInstance(RedDotMgr).getNodeByName(this.dotName)
+        let redDot = RedDotMgr.getNodeByName(this.dotName)
         if (!redDot){
             console.error("没找到节点")
             return

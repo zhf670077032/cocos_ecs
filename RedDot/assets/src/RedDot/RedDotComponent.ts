@@ -1,6 +1,7 @@
+import EventMgr from "../base/EventMgr";
 import { getInstance } from "../base/SingleFactory";
+import { GameMessageDefine } from "../define/GameMessageDefine";
 import RedDotMgr from "./RedDotMgr";
-import { EVENT_RED_DOT_REFRESH } from "./RedDotStaticConfig";
 
 const {ccclass, property} = cc._decorator;
 
@@ -39,17 +40,17 @@ export default class RedDotComponent extends cc.Component {
 
     /** 正常应该直接绑定refresh, 这里是为了区别刷新做了一个动画 */
     protected onLoad(): void {
-        cc.director.on(EVENT_RED_DOT_REFRESH, this.doAction.bind(this), this)
-        // cc.director.on(EVENT_RED_DOT_REFRESH, this.refresh.bind(this), this)
+        EventMgr.on(GameMessageDefine.EVENT_RED_DOT_REFRESH, this.doAction.bind(this), this)
+        // EventMgr.on(GameMessageDefine.EVENT_RED_DOT_REFRESH, this.refresh.bind(this), this)
     }
 
     protected onDestroy(): void {
-        cc.director.off(EVENT_RED_DOT_REFRESH, this.doAction.bind(this), this)
-        // cc.director.off(EVENT_RED_DOT_REFRESH, this.refresh.bind(this), this)
+        EventMgr.off(GameMessageDefine.EVENT_RED_DOT_REFRESH, this.doAction.bind(this), this)
+        // EventMgr.off(GameMessageDefine.EVENT_RED_DOT_REFRESH, this.refresh.bind(this), this)
     }
 
     refresh(){
-        let redDot = getInstance(RedDotMgr).getNodeByName(this.dotName)
+        let redDot = RedDotMgr.getNodeByName(this.dotName)
         let show = false, num = 0
         if (redDot) {
             [show, num] = redDot.getResult()
@@ -59,7 +60,7 @@ export default class RedDotComponent extends cc.Component {
     }
 
     doAction(){
-        let redDot = getInstance(RedDotMgr).getNodeByName(this.dotName)
+        let redDot = RedDotMgr.getNodeByName(this.dotName)
         let show = false, num = 0
         if (redDot) {
             [show, num] = redDot.getResult()

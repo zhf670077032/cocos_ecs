@@ -1,21 +1,57 @@
+import EventMgr from "../base/EventMgr";
 import { getInstance, singleClass } from "../base/SingleFactory";
+import { GameMessageDefine } from "../define/GameMessageDefine";
 import RedDotComponent from "./RedDotComponent";
 import RedDotNode from "./RedDotNode";
-import RedDotStaticConfig, { EVENT_RED_DOT_REFRESH, RedDotConfigTable } from "./RedDotStaticConfig";
+import RedDotStaticConfig, { RedDotConfigTable } from "./RedDotStaticConfig";
 
 
 
 @singleClass
-export default class RedDotMgr{
+class RedDotMgr{
     /**  固定的根结点 */
     nodeRoot : RedDotNode = new RedDotNode("nodeRoot")
     /** 生成的结点表 */
     nodeMap : {[key : string] : RedDotNode} = null
+    /** 监听消息的数据缓存 */
+    listenMessageMap : {[msgName : string] : {[nodeName : string] : boolean}} = {}
+    /** */
+    reCalculateNodeMap : {}
 
     init(){
         if(this.nodeMap == null) {
             this.nodeMap = this._createWithConfig(RedDotStaticConfig)
             this.nodeMap[this.nodeRoot.name] = this.nodeRoot
+        }
+    }
+
+    onEvent_refreshRedPoint(msgName, data){
+        if(msgName){
+            let map = this.listenMessageMap[msgName]
+            if (map){
+                for (const nodeName in map) {
+                    this.reCalculate(nodeName)
+                }
+            }
+        }
+    }
+
+    addMessageHandler(msgName, nodeName){
+        if (typeof msgName != "string"){
+            return
+        }
+        if (!this.listenMessageMap[msgName]){
+            this.listenMessageMap[msgName] = {}
+            EventMgr.on(msgName, this.onEvent_refreshRedPoint, this)
+        }
+        this.listenMessageMap[msgName][nodeName] = true
+    }
+
+    nodeAppendMessage(msgName : string | string[], nodeName){
+        if (typeof msgName == "string"){
+            this.addMessageHandler(msgName, nodeName)
+        } else if(typeof msgName == "object") {
+            msgName.forEach(msg => this.addMessageHandler(msg, nodeName))
         }
     }
 
@@ -26,6 +62,7 @@ export default class RedDotMgr{
      */
     private _createWithConfig(t : RedDotConfigTable){
         let map : {[key : string] : RedDotNode} = {}
+        let preConditionMap : {[nodeName :string] : boolean} = {}
         for (const nodeName in t) {
             const value = t[nodeName];
             let node = new RedDotNode(nodeName)
@@ -35,6 +72,14 @@ export default class RedDotMgr{
                     node.setCalculateParam(value.param)
                 }
             }
+            if(value.preCondition){
+                node.setPreCondition(value.preCondition)
+                preConditionMap[nodeName] = true
+            }
+            if(value.msgName){
+                node.setMessageName(value.msgName)
+            }
+            this.nodeAppendMessage(value.msgName, nodeName)
             map[nodeName] = node
         }
 
@@ -52,6 +97,28 @@ export default class RedDotMgr{
             }
         }
 
+        for (const nodeName in preConditionMap) {
+            let node = map[nodeName]
+            if (node && node.preCondition){
+                for (let index = 0; index < node.preCondition.length; index++) {
+                    let name = node.preCondition[index]
+                    let preNode = map[name]
+                    if (!preNode){
+                        if (this.nodeMap && this.nodeMap[name]){
+                            preNode = this.nodeMap[name]
+                        }
+                    }
+                    if (preNode){
+                        if (preNode.parent != this.nodeRoot){
+                            throw "preCondition 不能配置有父结点的结点，防止嵌套"
+                        }
+                        if (preNode && preNode.msgName){
+                            this.nodeAppendMessage(preNode.msgName, nodeName)
+                        }
+                    }
+                }
+            }
+        }
         return map
     }
 
@@ -73,13 +140,20 @@ export default class RedDotMgr{
     }
 
     /** 重新计算， 这里要抛事件 */
-    reCalculate(nodeName : string){
-        let node = this.getNodeByName(nodeName)
-        if (node) {
-            node.clearResult_Children()
-            node.clearResult_Parent()
+    reCalculate(...args){
+        let refreshed = false
+        for (let index = 0; index < args.length; index++) {
+            let nodeName = args[index]
+            let node = this.getNodeByName(nodeName)
+            if (node) {
+                node.clearResult_Children()
+                node.clearResult_Parent()
+                refreshed = true
+            }
+        }
+        if (refreshed) {
             this.nodeRoot.getResult()
-            cc.director.emit(EVENT_RED_DOT_REFRESH)
+            EventMgr.emit(GameMessageDefine.EVENT_RED_DOT_REFRESH)
         }
     }
 
@@ -96,3 +170,5 @@ export default class RedDotMgr{
 }
 
 getInstance(RedDotMgr).init()
+
+export default getInstance(RedDotMgr)
