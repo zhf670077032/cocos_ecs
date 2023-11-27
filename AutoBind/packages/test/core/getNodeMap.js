@@ -42,6 +42,7 @@ let getNodeMap = function(collector){
             object[node.name] = {
                 value : value,
                 index : index,
+                name : node.name,
                 uuid : node.uuid
             }
         } else {

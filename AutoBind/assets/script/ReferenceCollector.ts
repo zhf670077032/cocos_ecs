@@ -1,12 +1,22 @@
-const {ccclass, property, inspector, executeInEditMode, menu, help} = cc._decorator;
+const {ccclass, property, inspector, executeInEditMode} = cc._decorator;
 
 @ccclass
 // @executeInEditMode
-// @menu("i18n:MAIN_MENU.component.ui/Button")
-// @help("i18n:COMPONENT.help_url.button")
 @inspector("packages://auto-bind/auto-bind-inspector.js")
 export default class ReferenceCollector extends cc.Component{
     
     @property([cc.Node])
-    private nodeList: cc.Node[] = []
+    nodeList: cc.Node[] = []
+
+    @property
+    scriptName = ""
+
+    ui : any = null
+    onLoad(){
+        import("../" + this.scriptName).then(cls => {
+            this.ui = new cls.default(this)
+        }).catch(err => {
+            console.error(err)
+        })
+    }
 }

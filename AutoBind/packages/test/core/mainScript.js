@@ -17,11 +17,13 @@ module.exports = {
         }
     },
     // 看是不是需要导出或者赋值
-    "needModify_Assign" : (event, uuid, componentName) => {
+    "needModify_Assign" : (event, uuid, root, componentName) => {
         let node = cc.engine.getInstanceById(uuid)
         let object = getNodeMap.run(node)
         let content = getTemplate.run(object, componentName)
-        let filename = `${FileMgr.export_folder}/${componentName}.ts`
+        let filename = FileMgr.getExportFilename(root, componentName)
+        let collector = node.getComponent("ReferenceCollector");
+        collector.auto_name = filename.replace(".ts", "")
         if (FileMgr.fileNeedModify(filename, content)){
             event.reply(true, true, object);
         } else {
@@ -52,5 +54,15 @@ module.exports = {
             let nodeList = collector.nodeList
             nodeList.length += 5
         }
+    },
+
+    "pushNode" : (event, uuid, nodeName, nodeUuid) => {
+        let node = cc.engine.getInstanceById(uuid)
+        let collector = node.getComponent("ReferenceCollector");
+        collector.nodeMap[nodeName] = cc.engine.getInstanceById(nodeUuid)
+        for (const key in collector.nodeMap) {
+            Editor.log(key)
+        }
+        event.reply()
     }
 }

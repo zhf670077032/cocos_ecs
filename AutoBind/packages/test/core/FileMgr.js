@@ -8,7 +8,7 @@ const path = require('fire-path');
 // 根路径
 let assetsRoot = "assets"
 // 配置导出路径
-let export_folder = "auto"
+let export_folder = "src/auto"
 
 
 
@@ -50,8 +50,17 @@ let fileNeedModify = function (filepath, content) {
     return true
 }
 
+/**
+ * 获取导出的组件路径
+ * @param {string} ui_componentName 组件名称
+ * @returns 
+ */
+let getExportFilename = function(root, ui_componentName){
+    return `${export_folder}/${root}/${ui_componentName}.ts`
+}
+
 module.exports = {
-    export_folder : export_folder,
+    getExportFilename : getExportFilename,
     writeFile : writeFile,
     fileNeedModify : fileNeedModify
 }
